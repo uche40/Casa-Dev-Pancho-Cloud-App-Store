@@ -1,6 +1,3 @@
-To update the services to be on the same network called "cloud", you can modify the `wp-docker-compose.yml` file. In the `networks` section of both the `app` and `db` services, change the network name to "cloud". Here is an example of what the modified `wp-docker-compose.yml` file could look like:
-
-```
 name: wordpress
 services:
   app:
@@ -76,9 +73,3 @@ x-casaos:
 networks:
   cloud:
     driver: bridge
-``` 
-
-After making these changes, you can run the `docker-compose up` command to start the services on the "cloud" network.
-
-Citations:
-[1] https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/330558/28540b6f-e0d1-4534-a06f-df33b14aeb13/wp-docker-compose.yml
