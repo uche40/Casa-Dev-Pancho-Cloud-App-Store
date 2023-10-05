@@ -1,34 +1,84 @@
-# Configuration for big-bear-gotify setup
-name: big-bear-gotify
+To update the services to be on the same network called "cloud", you can modify the `wp-docker-compose.yml` file. In the `networks` section of both the `app` and `db` services, change the network name to "cloud". Here is an example of what the modified `wp-docker-compose.yml` file could look like:
 
-# Service definitions for the big-bear-gotify application
+```
+name: wordpress
 services:
-  # Service name: app
   app:
-    image: gotify/server:2.4.0 # Docker image for the service
+    depends_on:
+      - db
+    image: wordpress:latest
+    hostname: wordpress
+    networks:
+      - cloud
+    deploy:
+      resources:
+        reservations:
+          memory: 32M
+      restart: always
     ports:
-      - 8091:80 # Port mapping (host:container)
-    environment: # Environment variables for the service
-      - GOTIFY_DEFAULTUSER_NAME=admin
-      - GOTIFY_DEFAULTUSER_PASS=custom
-    volumes: # Volume mapping (host:container)
-      - "/DATA/AppData/$AppID/data:/app/data"
-    network_mode: bridge # Network mode
-
-# CasaOS specific configuration
+      - "8080:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: MyWordPressUser
+      WORDPRESS_DB_PASSWORD: Pa5w0rD
+      WORDPRESS_DB_NAME: MyWordPressDatabaseName
+    volumes:
+      - type: bind
+        source: /DATA/AppData/$AppID/html
+        target: /var/www/html
+  db:
+    image: mysql:latest
+    hostname: db
+    networks:
+      - cloud
+    deploy:
+      resources:
+        reservations:
+          memory: 512M
+      restart: always
+    volumes:
+      - type: bind
+        source: /DATA/AppData/$AppID/mysql
+        target: /var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: MyR00tMySQLPa5w0rD
+      MYSQL_DATABASE: MyWordPressDatabaseName
+      MYSQL_USER: MyWordPressUser
+      MYSQL_PASSWORD: Pa5w0rD
 x-casaos:
-  architectures: # Supported CPU architectures
+  architectures:
     - amd64
-  main: app # Main service of the application
-  description: # Description in different languages
-    en_us: a simple server for sending and receiving messages # Description in English
-  tagline: # Tagline in different languages
-    en_us: Gotify # Short description or tagline in English
-  developer: "gotify" # Developer's name or identifier
-  author: BigBearTechWorld # Author of this configuration
-  icon: https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/gotify.png # Icon for the application
-  thumbnail: "" # Thumbnail image (currently empty)
-  title: # Title in different languages
-    en_us: Gotify # Title in English
-  category: BigBearCasaOS # Application category
-  port_map: "8091" # Port mapping information
+    - arm
+    - arm64
+  main:
+    app:
+      description:
+        en_us: "Welcome to WordPress, the web platform trusted by millions of businesses worldwide. If you're an SMB owner looking to make a big impact online, you're in the right place. WordPress is your all-in-one solution for building a powerful website that showcases your products, services, and brand with style and professionalism. <br /> With easy-to-use tools, customizable themes, and a supportive community, WordPress empowers you to create a website that grows with your business. Whether you're just starting or ready to expand your online presence, WordPress is here to help you succeed in the digital world."
+      screenshot_link:
+        - https://raw.githubusercontent.com/mypancho/PanchoOS-AppStore/main/Apps/WordPress/screenshot-1.png
+        - https://raw.githubusercontent.com/mypancho/PanchoOS-AppStore/main/Apps/WordPress/screenshot-2.png
+        - https://raw.githubusercontent.com/mypancho/PanchoOS-AppStore/main/Apps/WordPress/screenshot-3.png
+        - https://raw.githubusercontent.com/mypancho/PanchoOS-AppStore/main/Apps/WordPress/screenshot-4.png
+      tagline:
+        en_us: A Free And Open-source CMS
+      developer: 'Automatic'
+      author: Pancho Inc
+      icon: https://raw.githubusercontent.com/mypancho/PanchoOS-AppStore/main/Apps/WordPress/icon.png
+      thumbnail: https://raw.githubusercontent.com/mypancho/PanchoOS-AppStore/main/Apps/WordPress/thumbnail.png
+      tips:
+        before_install:
+          en_us: |
+            For database connection, select `MySQL` then on the `database host` field put `db`, for `database user` put `root` and for `database password` put `casaos`
+      title:
+        en_us: Wordpress
+      category: CMS
+      port_map: '80'
+networks:
+  cloud:
+    driver: bridge
+``` 
+
+After making these changes, you can run the `docker-compose up` command to start the services on the "cloud" network.
+
+Citations:
+[1] https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/330558/28540b6f-e0d1-4534-a06f-df33b14aeb13/wp-docker-compose.yml
