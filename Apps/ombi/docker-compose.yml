@@ -1,0 +1,41 @@
+# Configuration for ombi setup
+name: ombi
+
+# Service definitions for the big-bear-gotify application
+services:
+  # Service name: app
+  app:
+    image: lscr.io/linuxserver/ombi:latest # Docker image for the service
+    ports:
+      - 8100:80 # Port mapping (host:container)
+    environment: # Environment variables for the service
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - BASE_URL=/ombi #optional
+    volumes: # Volume mapping (host:container)
+      - "/path/to/appdata/config:/config"
+    network_mode: bridge # Network mode
+    restart: unless-stopped
+
+# CasaOS specific configuration
+x-casaos:
+  architectures: # Supported CPU architectures
+    - amd64
+  main: app # Main service of the application
+  description: # Description in different languages
+    en_us: Ombi, a self-hosted web app, grants your shared Plex, Emby, or Jellyfin users the autonomy to request contents effortlessly. With its automatic feature, users can indepedently submit their desired content # Description in English
+  tagline: # Tagline in different languages
+    en_us: Ombi facilitates user-driven content requests for Plex, Emby, or Jellyfin # Short description or tagline in English
+  developer: "ombi" # Developer's name or identifier
+  author: Mypancho.com # Author of this configuration
+  icon: https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/gotify.png # Icon for the application
+  screenshot_link:
+    - https://cdn.jsdelivr.net/gh/mypancho/Pancho-Cloud-App-Store@main/Apps/Bazarr/screenshot-1.png
+    - https://cdn.jsdelivr.net/gh/mypancho/Pancho-Cloud-App-Store@main/Apps/Bazarr/screenshot-2.png
+    - https://cdn.jsdelivr.net/gh/mypancho/Pancho-Cloud-App-Store@main/Apps/Bazarr/screenshot-3.png
+  thumbnail: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Bazarr/thumbnail.png" # Thumbnail image
+  title: # Title in different languages
+    en_us: ombi # Title in English
+  category: project_management # Application category
+  port_map: "8100" # Port mapping information
