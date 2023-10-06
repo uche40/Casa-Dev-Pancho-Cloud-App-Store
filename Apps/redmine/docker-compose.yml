@@ -1,0 +1,63 @@
+# Configuration for redmine setup
+
+# Name of the redmine application
+name: redmine
+
+# Service definitions for the redmine application
+services:
+  # Service name: app
+  app:
+    image: redmine
+    ports:
+      - 8100:80
+    environment:
+      redmine_DB_HOST: db
+      redmine_DB_PASSWORD: example
+      redmine_DB_NAME: redmine
+    volumes:
+      - /usr/src/redmine/files
+    depends_on:
+      - db
+
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_DATABASE: redmine
+      MYSQL_PASSWORD: example
+      MYSQL_ROOT_PASSWORD: example
+    volumes:
+      - /usr/src/redmine/files
+
+# CasaOS specific configuration
+x-casaos:
+  # Supported CPU architectures for the application
+  architectures:
+    - amd64
+    - arm
+  # Main service of the application
+  main: app
+  description:
+    # Description in English
+    en_us: Redmine, a web-based project management and issue tracking tool, is freely available for use and is an open source software. With its capabilities, users can efficiently handle multiple projects and their corresponding subprojects.
+  tagline:
+    # Short description or tagline in English
+    en_us: Redmine - free, open-source tool for project and issue management
+  # Developer's name or identifier
+  developer: "Redmine"
+  # Author of this configuration
+  author: Mypancho.com
+  # Icon for the application
+  icon: https://cdn.jsdelivr.net/gh/mypancho/Pancho-Cloud-App-Store@main/Apps/redmine/icon.png
+  screenshot_link:
+    - https://cdn.jsdelivr.net/gh/mypancho/Pancho-Cloud-App-Store@main/Apps/redmine/screenshot-1.png
+    - https://cdn.jsdelivr.net/gh/mypancho/Pancho-Cloud-App-Store@main/Apps/redmine/screenshot-2.png
+    - https://cdn.jsdelivr.net/gh/mypancho/Pancho-Cloud-App-Store@main/Apps/redmine/screenshot-3.png
+  # Thumbnail image 
+  thumbnail: "https://cdn.jsdelivr.net/gh/mypancho/Pancho-Cloud-App-Store@main/Apps/redmine/thumbnail.png"
+  title:
+    # Title in English
+    en_us: Redmine
+  # Application category
+  category: project-management
+  # Port mapping information
+  port_map: "8100"
