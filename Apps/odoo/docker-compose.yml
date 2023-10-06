@@ -1,0 +1,74 @@
+# Configuration for odoo setup
+
+# Name of the odoo application
+name: odoo
+
+# Service definitions for the wordpress application
+services:
+  # Service name:
+  web:
+    image: odoo:16.0
+    ports:
+      - 8100:80
+    volumes:
+      - odoo-web-data:/var/lib/odoo
+      - ./config:/etc/odoo
+      - ./addons:/mnt/extra-addons
+    environment:
+      - PASSWORD_FILE=/run/secrets/postgresql_password
+    secrets:
+      - postgresql_password
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgresql_password
+      POSTGRES_USER: odoo
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - odoo-db-data:/var/lib/postgresql/data/pgdata
+    secrets:
+      - postgresql_password
+  volumes:
+    odoo-web-data:
+    odoo-db-data:
+
+secrets:
+    postgresql_password:
+      file: odoo_pg_pass
+
+# CasaOS specific configuration
+x-casaos:
+  # Supported CPU architectures for the application
+  architectures:
+    - amd64
+    - arm
+  # Main service of the application
+  main: app
+  description:
+    # Description in English
+    en_us: God is great
+  tagline:
+    # Short description or tagline in English
+    en_us: odoo
+  # Developer's name or identifier
+  developer: "odoo"
+  # Author of this configuration
+  author: Mypancho.com
+  # Icon for the application
+  icon: https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/wordpress.png
+  screenshot_link:
+    - https://cdn.jsdelivr.net/gh/mypancho/Pancho-Cloud-App-Store@main/Apps/Bazarr/screenshot-1.png
+    - https://cdn.jsdelivr.net/gh/mypancho/Pancho-Cloud-App-Store@main/Apps/Bazarr/screenshot-2.png
+    - https://cdn.jsdelivr.net/gh/mypancho/Pancho-Cloud-App-Store@main/Apps/Bazarr/screenshot-3.png
+    - https://cdn.jsdelivr.net/gh/mypancho/Pancho-Cloud-App-Store@main/Apps/Bazarr/screenshot-4.png
+  # Thumbnail image (currently empty)
+  thumbnail: ""
+  title:
+    # Title in English
+    en_us: odoo
+  # Application category
+  category: project_management
+  # Port mapping information
+  port_map: "8100"
