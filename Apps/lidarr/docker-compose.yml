@@ -27,7 +27,7 @@ x-casaos:
   description:
     en_us: Lidarr serves as a music collection manager catering to Usenet and BitTorrent users. It efficiently checks numerous RSS feeds to discover fresh albums from your cherished artists. Interfacing with clients and indexers, Lidarr effortlessly acquires, organizes, and renames these albums. Additionally, it can be customized to automatically enhance the quality of existing files in your library whenever improved formats are accessible.
   developer: lidarr
-  icon: https://cdn.jsdelivr.net/gh/uche40/Dev-Pancho-Cloud-App-Store@main/Apps/lindarr/icon.png
+  icon: https://cdn.jsdelivr.net/gh/uche40/Dev-Pancho-Cloud-App-Store@main/Apps/lidarr/icon.png
   index: /
   main: app
   port_map: ${WEBUI_PORT:-8686}
@@ -38,7 +38,7 @@ x-casaos:
   title:
     en_us: Lidarr
   screenshot_link:
-    - https://cdn.jsdelivr.net/gh/uche40/Dev-Pancho-Cloud-App-Store@main/Apps/lindarr/screenshot-1.png
-    - https://cdn.jsdelivr.net/gh/uche40/Dev-Pancho-Cloud-App-Store@main/Apps/lindarr/screenshot-2.png
-    - https://cdn.jsdelivr.net/gh/uche40/Dev-Pancho-Cloud-App-Store@main/Apps/lindarr/screenshot-3.png
-  thumbnail: https://cdn.jsdelivr.net/gh/uche40/Dev-Pancho-Cloud-App-Store@main/Apps/lindarr/thumbnail.png
+    - https://cdn.jsdelivr.net/gh/uche40/Dev-Pancho-Cloud-App-Store@main/Apps/lidarr/screenshot-1.png
+    - https://cdn.jsdelivr.net/gh/uche40/Dev-Pancho-Cloud-App-Store@main/Apps/lidarr/screenshot-2.png
+    - https://cdn.jsdelivr.net/gh/uche40/Dev-Pancho-Cloud-App-Store@main/Apps/lidarr/screenshot-3.png
+  thumbnail: https://cdn.jsdelivr.net/gh/uche40/Dev-Pancho-Cloud-App-Store@main/Apps/lidarr/thumbnail.png
