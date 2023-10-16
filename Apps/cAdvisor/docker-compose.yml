@@ -18,7 +18,7 @@ services:
     # Volumes to be mounted to the container
     volumes:
       # Mount the root directory of the host in a read-only mode
-      - /:/rootfs:ro
+      - /:/roots:ro
       # Mount the var run directory of the host in a read-write mode
       - /var/run:/var/run:rw
       # Mount Docker socket to allow cAdvisor to monitor other containers
