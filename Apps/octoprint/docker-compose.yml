@@ -5,7 +5,7 @@ name: octoprint
 
 # Service definitions for the application
 services:
-  Service name: app
+  # Service name: app
   # The `app` service definition
   app:
     # Name of the container
