@@ -5,7 +5,7 @@ name: traccar
 
 # Service definitions for the application
 services:
-  Service name: app
+  # Service name: app
   app:
     image: traccar/traccar:latest # Specifies the docker image to use for this service. Using the latest version of the traccar image.
     container_name: traccar # Name of the container that will be created
