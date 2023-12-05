@@ -1,84 +1,41 @@
-version: '2'
+version: '3.3'
 services:
-  freepbx-app:
-    container_name: freepbx-app
-    image: tiredofit/freepbx
+  freepbx:
+    build: .
+    image: flaviostutz/freepbx
     ports:
-      - 8010:80                     
-      - 5060:5060/udp               
-      - 5060:5060/tcp
-      - 5160:5160/udp             
-      - 5160:5160/tcp
-      - 18000-18100:18000-18100/udp   
-      - 4445:4445                 
-      - 4080:443                
-    volumes:
-      - ./certs:/certs
-      - ./data:/data
-      - ./logs:/var/log
-      - ./data/www:/var/www/html
-    environment:
-      - VIRTUAL_HOST=pbx.co.in
-      - VIRTUAL_NETWORK=nginx-proxy
-      - VIRTUAL_PORT=8010
-      - ZABBIX_HOSTNAME=freepbx-app
-      - RTP_START=18000
-      - RTP_FINISH=18100
-      - DB_EMBEDDED=FALSE
-      - DB_HOST=freepbx-db
-      - DB_PORT=3306
-      - DB_NAME=asterisk
-      - DB_USER=asterisk
-      - DB_PASS=asteriskpass
-      - TLS_CERT=cert.pem
-      - TLS_KEY=key.pem
-    restart: always
-    networks:
-      - proxy-tier
-    cap_add:
-      - NET_ADMIN
+      - 8080:80
+      - 5060:5060/udp
+      - 5160:5160/udp
+      - 3306:3306
+      - 18000-18100:18000-18100/udp
+    # network_mode: host
     privileged: true
-  freepbx-db:
-    container_name: freepbx-db
-    image: tiredofit/mariadb
     restart: always
-    volumes:
-      - ./db:/var/lib/mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=password
-      - MYSQL_DATABASE=asterisk
-      - MYSQL_USER=asterisk
-      - MYSQL_PASSWORD=asteriskpass
-    networks:
-      - proxy-tier
-
-  freepbx-db-backup:
-    container_name: freepbx-db-backup
-    image: tiredofit/db-backup
-    links:
-      - freepbx-db
+      - MARIADB_REMOTE_ROOT_PASSWORD=admin123
+      - ADMIN_PASSWORD=admin123
+      - DISABLE_SIGNATURE_CHECK=true
+      - USE_CHAN_SIP=true
+      - FAIL2BAN_ENABLE=true
+      - FAIL2BAN_FINDTIME=30
+      - FAIL2BAN_MAXRETRY=10
+      - FAIL2BAN_BANTIME=10
     volumes:
-      - ./dbbackup:/backup
-    environment:
-      - ZABBIX_HOSTNAME=freepbx-db-backup
-      - DB_HOST=freepbx-db
-      - DB_TYPE=mariadb
-      - DB_NAME=asterisk
-      - DB_USER=asterisk
-      - DB_PASS=asteriskpass
-      - DB_DUMP_FREQ=1440
-      - DB_DUMP_BEGIN=0000
-      - DB_CLEANUP_TIME=8640
-      - COMPRESSION=BZ
-      - MD5=TRUE
-    networks:
-      - proxy-tier
+      - backup:/backup
+      - recordings:/var/spool/asterisk/monitor
+      - certificates:/etc/asterisk/keys
+  
+  adminer:
+    image: adminer:4.7.6
     restart: always
+    ports:
+      - "9292:8080"
 
-networks:
-  proxy-tier:
-    external:
-      name: nginx-proxy
+volumes:
+  backup:
+  recordings:
+  certificates:
 
 x-casaos:
   architectures:
