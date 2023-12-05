@@ -1,41 +1,30 @@
-version: '3.3'
+version: '2'
 services:
   freepbx:
-    build: .
-    image: flaviostutz/freepbx
+#    build: .
+    image: mima84/docker-freepbx
+    container_name: freepbx
+
+#    network_mode: "host"
     ports:
-      - 8080:80
-      - 5060:5060/udp
-      - 5160:5160/udp
-      - 3306:3306
-      - 18000-18100:18000-18100/udp
-    # network_mode: host
-    privileged: true
-    restart: always
-    environment:
-      - MARIADB_REMOTE_ROOT_PASSWORD=admin123
-      - ADMIN_PASSWORD=admin123
-      - DISABLE_SIGNATURE_CHECK=true
-      - USE_CHAN_SIP=true
-      - FAIL2BAN_ENABLE=true
-      - FAIL2BAN_FINDTIME=30
-      - FAIL2BAN_MAXRETRY=10
-      - FAIL2BAN_BANTIME=10
+    - "5160-5161:5160-5161/udp"
+    - "5060-5060:5060-5060/udp"
+    - "8082:8082/tcp"
+    - "10000-10050:10000-10050/udp"
+    
     volumes:
-      - backup:/backup
-      - recordings:/var/spool/asterisk/monitor
-      - certificates:/etc/asterisk/keys
-  
-  adminer:
-    image: adminer:4.7.6
-    restart: always
-    ports:
-      - "9292:8080"
+      - freepbx-apache:/etc/apache2
+      - freepbx-asterisk-config:/etc/asterisk
+      - freepbx-mysql:/var/lib/mysql
+      - freepbx-asterisk-spool:/var/spool/asterisk
+      - freepbx-asterisk-data:/var/lib/asterisk
 
 volumes:
-  backup:
-  recordings:
-  certificates:
+  freepbx-apache:
+  freepbx-asterisk-config:
+  freepbx-mysql:
+  freepbx-asterisk-spool:
+  freepbx-asterisk-data:
 
 x-casaos:
   architectures:
