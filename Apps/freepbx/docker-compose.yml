@@ -1,85 +1,84 @@
-version: '3'
+version: '2'
+services:
+  freepbx-app:
+    container_name: freepbx-app
+    image: tiredofit/freepbx
+    ports:
+      - 8010:80                     
+      - 5060:5060/udp               
+      - 5060:5060/tcp
+      - 5160:5160/udp             
+      - 5160:5160/tcp
+      - 18000-18100:18000-18100/udp   
+      - 4445:4445                 
+      - 4080:443                
+    volumes:
+      - ./certs:/certs
+      - ./data:/data
+      - ./logs:/var/log
+      - ./data/www:/var/www/html
+    environment:
+      - VIRTUAL_HOST=pbx.co.in
+      - VIRTUAL_NETWORK=nginx-proxy
+      - VIRTUAL_PORT=8010
+      - ZABBIX_HOSTNAME=freepbx-app
+      - RTP_START=18000
+      - RTP_FINISH=18100
+      - DB_EMBEDDED=FALSE
+      - DB_HOST=freepbx-db
+      - DB_PORT=3306
+      - DB_NAME=asterisk
+      - DB_USER=asterisk
+      - DB_PASS=asteriskpass
+      - TLS_CERT=cert.pem
+      - TLS_KEY=key.pem
+    restart: always
+    networks:
+      - proxy-tier
+    cap_add:
+      - NET_ADMIN
+    privileged: true
+  freepbx-db:
+    container_name: freepbx-db
+    image: tiredofit/mariadb
+    restart: always
+    volumes:
+      - ./db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=asterisk
+      - MYSQL_USER=asterisk
+      - MYSQL_PASSWORD=asteriskpass
+    networks:
+      - proxy-tier
+
+  freepbx-db-backup:
+    container_name: freepbx-db-backup
+    image: tiredofit/db-backup
+    links:
+      - freepbx-db
+    volumes:
+      - ./dbbackup:/backup
+    environment:
+      - ZABBIX_HOSTNAME=freepbx-db-backup
+      - DB_HOST=freepbx-db
+      - DB_TYPE=mariadb
+      - DB_NAME=asterisk
+      - DB_USER=asterisk
+      - DB_PASS=asteriskpass
+      - DB_DUMP_FREQ=1440
+      - DB_DUMP_BEGIN=0000
+      - DB_CLEANUP_TIME=8640
+      - COMPRESSION=BZ
+      - MD5=TRUE
+    networks:
+      - proxy-tier
+    restart: always
 
 networks:
-  freepbx:
-    driver: bridge
-  databases:
-    driver: bridge
-
-services:
-  db:
-    image: mariadb:10.6.8
-    container_name: izpbx-db
-    ## WARNING: if you upgrade image tag enter the container and run mysql_upgrade:
-    ## source .env ; docker exec -it izpbx-db mysql_upgrade -u root -p$MYSQL_ROOT_PASSWORD
-    command: --sql-mode=ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
-    restart: unless-stopped
-    env_file:
-      - stack.env
-    environment:
-      - TZ
-      - MYSQL_DATABASE
-      - MYSQL_USER
-      - MYSQL_PASSWORD
-      - MYSQL_ROOT_PASSWORD
-      #- MARIADB_RANDOM_ROOT_PASSWORD=${MYSQL_RANDOM_ROOT_PASSWORD}
-      #- MARIADB_ALLOW_EMPTY_ROOT_PASSWORD=${MYSQL_ALLOW_EMPTY_ROOT_PASSWORD}
-    volumes:
-      #- /etc/localtime:/etc/localtime:ro
-      - ./data/db:/var/lib/mysql
-      ## NOTE: to avoid nat management use: 'network_mode: host'
-      #network_mode: host
-      ## WARNING: if 'network_mode: host' is disabled, comment out the following lines
-    networks:
-      - databases
-    ## WARNING: if commented out, the database will be exposed outside the container
-    ports:
-      - ${APP_PORT_MYSQL}:3306
-
-  # https://hub.docker.com/r/izdock/izpbx-asterisk/tags?page=1&ordering=last_updated
-  freepbx:
-    image: wiseowls/freepbx-quectel
-    container_name: freepbx
-    hostname: ${APP_FQDN}
-    restart: unless-stopped
-    user: root
-    env_file:
-      - stack.env
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ./data:/data
-    ## fail2ban need privileged mode to manage iptables
-    privileged: true
-    ulimits:
-      nofile:
-        soft: 8192
-        hard: 32768
-    ## NOTE: to avoid SIP-RTP NAT issues use: 'network_mode: host'
-    #    network_mode: host
-    networks:
-      - freepbx
-      - databases
-    ports:
-      #- ${APP_PORT_HTTP}:${APP_PORT_HTTP}
-      #- ${APP_PORT_HTTPS}:${APP_PORT_HTTPS}
-      - ${APP_PORT_IAX}:${APP_PORT_IAX}
-      - ${APP_PORT_IAX}:${APP_PORT_IAX}/udp
-      - ${APP_PORT_PJSIP}:${APP_PORT_PJSIP}
-      - ${APP_PORT_PJSIP}:${APP_PORT_PJSIP}/udp
-      - ${APP_PORT_SIP}:${APP_PORT_SIP}/udp
-      - ${APP_PORT_SIP}:${APP_PORT_SIP}
-      - ${APP_PORT_WEBRTC}:${APP_PORT_WEBRTC}
-      - ${APP_PORT_UCP_HTTP}:${APP_PORT_UCP_HTTP}
-      - ${APP_PORT_UCP_HTTPS}:${APP_PORT_UCP_HTTPS}
-      - ${APP_PORT_AMI}:${APP_PORT_AMI}
-      - ${APP_PORT_RTP_START}-${APP_PORT_RTP_END}:${APP_PORT_RTP_START}-${APP_PORT_RTP_END}
-      - ${APP_PORT_RTP_START}-${APP_PORT_RTP_END}:${APP_PORT_RTP_START}-${APP_PORT_RTP_END}/udp
-      #- ${APP_PORT_DHCP}:${APP_PORT_DHCP}/udp
-      #- ${APP_PORT_TFTP}:${APP_PORT_TFTP}
-      #- ${APP_PORT_TFTP}:${APP_PORT_TFTP}/udp
-      #- ${APP_PORT_NTP}:${APP_PORT_NTP}/udp
-      #- ${APP_PORT_FOP2}:${APP_PORT_FOP2}
-      #- ${APP_PORT_ZABBIX}:${APP_PORT_ZABBIX}
+  proxy-tier:
+    external:
+      name: nginx-proxy
 
 x-casaos:
   architectures:
