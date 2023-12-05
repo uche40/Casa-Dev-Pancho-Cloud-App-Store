@@ -1,51 +1,103 @@
-name: kavita
+version: '3'
+
+networks:
+  freepbx:
+    driver: bridge
+  databases:
+    driver: bridge
+
 services:
-  app:
-    image: linuxserver/kavita:0.7.8
+  db:
+    image: mariadb:10.6.8
+    container_name: izpbx-db
+    ## WARNING: if you upgrade image tag enter the container and run mysql_upgrade:
+    ## source .env ; docker exec -it izpbx-db mysql_upgrade -u root -p$MYSQL_ROOT_PASSWORD
+    command: --sql-mode=ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
     restart: unless-stopped
+    env_file:
+      - stack.env
     environment:
-      PUID: $PUID
-      PGID: $PGID
-      TZ: $TZ
-    x-casaos:
-      envs:
-        - container: PUID
-          description:
-            en_us: for UserID
-        - container: PGID
-          description:
-            en_us: for GroupID
-        - container: TZ
-          description:
-            en_us: specify a timezone to use, see this list.
-    ports:
-      - target: 5000
-        published: 5000
-        protocol: tcp
+      - TZ
+      - MYSQL_DATABASE
+      - MYSQL_USER
+      - MYSQL_PASSWORD
+      - MYSQL_ROOT_PASSWORD
+      #- MARIADB_RANDOM_ROOT_PASSWORD=${MYSQL_RANDOM_ROOT_PASSWORD}
+      #- MARIADB_ALLOW_EMPTY_ROOT_PASSWORD=${MYSQL_ALLOW_EMPTY_ROOT_PASSWORD}
     volumes:
-      - type: bind
-        source: /DATA/AppData/kavita/config
-        target: /config
-      - type: bind
-        source: /DATA/AppData/kavita/data
-        target: /data
+      #- /etc/localtime:/etc/localtime:ro
+      - ./data/db:/var/lib/mysql
+      ## NOTE: to avoid nat management use: 'network_mode: host'
+      #network_mode: host
+      ## WARNING: if 'network_mode: host' is disabled, comment out the following lines
+    networks:
+      - databases
+    ## WARNING: if commented out, the database will be exposed outside the container
+    ports:
+      - ${APP_PORT_MYSQL}:3306
+
+  # https://hub.docker.com/r/izdock/izpbx-asterisk/tags?page=1&ordering=last_updated
+  freepbx:
+    image: wiseowls/freepbx-quectel
+    container_name: freepbx
+    hostname: ${APP_FQDN}
+    restart: unless-stopped
+    user: root
+    env_file:
+      - stack.env
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./data:/data
+    ## fail2ban need privileged mode to manage iptables
+    privileged: true
+    ulimits:
+      nofile:
+        soft: 8192
+        hard: 32768
+    ## NOTE: to avoid SIP-RTP NAT issues use: 'network_mode: host'
+    #    network_mode: host
+    networks:
+      - freepbx
+      - databases
+    ports:
+      #- ${APP_PORT_HTTP}:${APP_PORT_HTTP}
+      #- ${APP_PORT_HTTPS}:${APP_PORT_HTTPS}
+      - ${APP_PORT_IAX}:${APP_PORT_IAX}
+      - ${APP_PORT_IAX}:${APP_PORT_IAX}/udp
+      - ${APP_PORT_PJSIP}:${APP_PORT_PJSIP}
+      - ${APP_PORT_PJSIP}:${APP_PORT_PJSIP}/udp
+      - ${APP_PORT_SIP}:${APP_PORT_SIP}/udp
+      - ${APP_PORT_SIP}:${APP_PORT_SIP}
+      - ${APP_PORT_WEBRTC}:${APP_PORT_WEBRTC}
+      - ${APP_PORT_UCP_HTTP}:${APP_PORT_UCP_HTTP}
+      - ${APP_PORT_UCP_HTTPS}:${APP_PORT_UCP_HTTPS}
+      - ${APP_PORT_AMI}:${APP_PORT_AMI}
+      - ${APP_PORT_RTP_START}-${APP_PORT_RTP_END}:${APP_PORT_RTP_START}-${APP_PORT_RTP_END}
+      - ${APP_PORT_RTP_START}-${APP_PORT_RTP_END}:${APP_PORT_RTP_START}-${APP_PORT_RTP_END}/udp
+      #- ${APP_PORT_DHCP}:${APP_PORT_DHCP}/udp
+      #- ${APP_PORT_TFTP}:${APP_PORT_TFTP}
+      #- ${APP_PORT_TFTP}:${APP_PORT_TFTP}/udp
+      #- ${APP_PORT_NTP}:${APP_PORT_NTP}/udp
+      #- ${APP_PORT_FOP2}:${APP_PORT_FOP2}
+      #- ${APP_PORT_ZABBIX}:${APP_PORT_ZABBIX}
+
 x-casaos:
   architectures:
     - amd64
     - arm64
   main: app
   description:
-    en_us: Kavita is a fast, feature rich, cross platform reading server. Built with a focus for being a full solution for all your reading needs. Setup your own server and share your reading collection with your friends and family!
+    en_us: FreePBX is a web based user interface designed to simplify management of Asterisk PBX.
   tagline:
-    en_us: Cross-platform reading server offering speed and rich features.
-  developer: Kavitateam
+    en_us: FreePBX is a web based user interface designed to simplify management of Asterisk PBX.
+  developer: Izpbx
   author: Mypancho.com
-  icon: https://cdn.jsdelivr.net/gh/uche40/Dev-Pancho-Cloud-App-Store@main/Apps/kavita/icon.png
+  icon: https://cdn.jsdelivr.net/gh/uche40/Dev-Pancho-Cloud-App-Store@main/Apps/freepbx/icon.png
   screenshot_link:
-    - https://cdn.jsdelivr.net/gh/uche40/Dev-Pancho-Cloud-App-Store@main/Apps/kavita/screenshot-1.png
-    - https://cdn.jsdelivr.net/gh/uche40/Dev-Pancho-Cloud-App-Store@main/Apps/kavita/screenshot-2.png
-    - https://cdn.jsdelivr.net/gh/uche40/Dev-Pancho-Cloud-App-Store@main/Apps/kavita/screenshot-3.png
-  thumbnail: https://cdn.jsdelivr.net/gh/uche40/Dev-Pancho-Cloud-App-Store@main/Apps/kavita/thumbnail.png
+    - https://cdn.jsdelivr.net/gh/uche40/Dev-Pancho-Cloud-App-Store@main/Apps/freepbx/screenshot-1.png
+    - https://cdn.jsdelivr.net/gh/uche40/Dev-Pancho-Cloud-App-Store@main/Apps/freepbx/screenshot-2.png
+    - https://cdn.jsdelivr.net/gh/uche40/Dev-Pancho-Cloud-App-Store@main/Apps/freepbx/screenshot-3.png
+  thumbnail: https://cdn.jsdelivr.net/gh/uche40/Dev-Pancho-Cloud-App-Store@main/Apps/freepbx/thumbnail.png
   title:
-    en_us: Kavita
+    en_us: freepbx
   category: Server
