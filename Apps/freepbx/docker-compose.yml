@@ -1,34 +1,35 @@
-version: '3'
+version: '2'
 
 services:
+
   freepbx:
-    image: quay.io/arkadi/sangoma
+    image: freepbx/freepbx:latest
     ports:
       - "80:80"
+      - "443:443"
+      - "22:22"
       - "5060:5060"
-      - "4569:4569"
-      - "5061:5061"
-      - "5160:5160"
-      - "5161:5161"
-      - "4568:4568"
-      - "83:83"
-      - "5555:5555"
+      - "5060:5060/udp"
+      - "10000-20000:10000-20000/udp"
     environment:
-      - MYSQL_ROOT_PASSWORD=password
-      - ASTERISK_DB_PW=password
-      - ASTERISK_DB_USER=root
-      - ASTERISK_DB_PW_ROOT=asterisk
-      - ASTERISK_DB_PW_USER=password
-      - MYSQL_PASSWORD=password
+      PUBLIC_IP: 192.168.1.100 
     volumes:
-      - /var/lib/asterisk:/var/lib/asterisk
-      - /etc/asterisk:/etc/asterisk
-      - /var/lib/mysql:/var/lib/mysql
-      - /var/log/asterisk:/var/log/asterisk
-      - /tftpboot:/tftpboot
-      - /etc/amportal.conf:/etc/amportal.conf
-      - /etc/asterisk/voicemail.conf:/etc/asterisk/voicemail.conf
+      - ./data:/var/lib/asterisk
+      - ./recordings:/var/spool/asterisk
     restart: always
+
+  db:
+    image: freepbx/mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+    volumes:
+      - ./mysql:/var/lib/mysql
+    restart: always
+
+networks:
+  default:
+    external:
+      name: freepbx_network
     
 x-casaos:
   architectures:
