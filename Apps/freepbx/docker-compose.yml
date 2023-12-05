@@ -1,31 +1,35 @@
-version: '2'
+version: '3'
+
 services:
   freepbx:
-#    build: .
-    image: mima84/docker-freepbx
-    container_name: freepbx
-
-#    network_mode: "host"
+    image: quay.io/arkadi/sangoma
     ports:
-    - "5160-5161:5160-5161/udp"
-    - "5060-5060:5060-5060/udp"
-    - "8082:8082/tcp"
-    - "10000-10050:10000-10050/udp"
-    
+      - "80:80"
+      - "5060:5060"
+      - "4569:4569"
+      - "5061:5061"
+      - "5160:5160"
+      - "5161:5161"
+      - "4568:4568"
+      - "83:83"
+      - "5555:5555"
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - ASTERISK_DB_PW=password
+      - ASTERISK_DB_USER=root
+      - ASTERISK_DB_PW_ROOT=asterisk
+      - ASTERISK_DB_PW_USER=password
+      - MYSQL_PASSWORD=password
     volumes:
-      - freepbx-apache:/etc/apache2
-      - freepbx-asterisk-config:/etc/asterisk
-      - freepbx-mysql:/var/lib/mysql
-      - freepbx-asterisk-spool:/var/spool/asterisk
-      - freepbx-asterisk-data:/var/lib/asterisk
-
-volumes:
-  freepbx-apache:
-  freepbx-asterisk-config:
-  freepbx-mysql:
-  freepbx-asterisk-spool:
-  freepbx-asterisk-data:
-
+      - /var/lib/asterisk:/var/lib/asterisk
+      - /etc/asterisk:/etc/asterisk
+      - /var/lib/mysql:/var/lib/mysql
+      - /var/log/asterisk:/var/log/asterisk
+      - /tftpboot:/tftpboot
+      - /etc/amportal.conf:/etc/amportal.conf
+      - /etc/asterisk/voicemail.conf:/etc/asterisk/voicemail.conf
+    restart: always
+    
 x-casaos:
   architectures:
     - amd64
