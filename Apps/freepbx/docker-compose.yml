@@ -1,39 +1,22 @@
-version: '2'
+version: '3.5'
 
 services:
   freepbx:
-    image: 'sipxcom/freepbx'
-    ports:
-      - '5060:5060/udp'
-      - '5060:5060/tcp'
-      - '5160:5160/udp'
-      - '5160:5160/tcp'
-      - '18000-18100:18000-18100/udp'
+    image: linuxserver/freepbx
+    container_name: freepbx
     environment:
-      - 'DB_HOST=db'
-      - 'DB_USER=freepbxuser'
-      - 'DB_PASS=password'
-      - 'ASTERISK_DB_PW=asterisk'
-    restart: always
-
-  db:
-    image: 'mariadb'
-    environment:
-      - 'MYSQL_ROOT_PASSWORD=password'
-      - 'MYSQL_DATABASE=freepbx'
-      - 'MYSQL_USER=freepbxuser'
-      - 'MYSQL_PASSWORD=password'
-    restart: always
-
-  web:
-    image: 'php:apache'
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
     volumes:
-      - '/var/www/html:/var/www/html'
-    restart: always
-    depends_on:
-      - db
-      - freepbx
-      
+      - /path/to/local/config:/config
+    ports:
+      - 8080:80
+      - 5060:5060/udp
+      - 5160:5160/udp
+      - 4569:4569/udp
+    restart: unless-stopped
+    
 x-casaos:
   architectures:
     - amd64
