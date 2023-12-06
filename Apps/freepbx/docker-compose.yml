@@ -1,4 +1,4 @@
-version: '2'
+version: "3.7"
 
 services:
 
@@ -7,25 +7,23 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      - "22:22"
       - "5060:5060"
-      - "5060:5060/udp"
-      - "10000-20000:10000-20000/udp"
+      - "5061:5061"  
+      - "10000-10200:10000-10200/udp"
     environment:
-      PUBLIC_IP: 192.168.1.100 
+     - TZ="America/New_York"
     volumes:
-      - ./data:/var/lib/asterisk
-      - ./recordings:/var/spool/asterisk
+      - /etc/localtime:/etc/localtime:ro  
+      - /path/on/host:/var/lib/asterisk
     restart: always
 
-  db:
-    image: freepbx/mariadb
-    environment:
-      MYSQL_ROOT_PASSWORD: example
-    volumes:
-      - ./mysql:/var/lib/mysql
-    restart: always
-
+volumes:
+  freepbx_data:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/path/on/host'
 networks:
   default:
     external:
