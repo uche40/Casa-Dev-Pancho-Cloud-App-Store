@@ -1,28 +1,27 @@
-version: '3'
+version: "3.3"
+
 services:
-
-  mariadb:
-    image: mariadb:latest
+  freepbx:  
+    image: tiredofit/freepbx:latest 
+    ports:
+      - "80:80"
+      - "443:443"
+      - "5060:5060"
+      - "10000-10200:10000-10200/udp"
+      
     volumes:
-      - db_data:/var/lib/mysql
-    restart: always
+      - ./data:/config
+      - /etc/localtime:/etc/localtime:ro
+
     environment:
-      MYSQL_ROOT_PASSWORD: yourrootpassword
-      MYSQL_DATABASE: freepbx
-      MYSQL_USER: freepbx
-      MYSQL_PASSWORD: password
+      - PUID=1000 
+      - PGID=1000
+      - TZ=America/New_York
 
-  freepbx:
-    image: freepbxcommunity/freepbx
-    volumes:
-      - freepbx_data:/var/lib/asterisk
-    depends_on:
-      - mariadb
+    restart: unless-stopped
 
 volumes:
-
-  db_data:
-  freepbx_data:
+  data:
       
 x-casaos:
   architectures:
