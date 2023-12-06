@@ -1,27 +1,30 @@
-version: "3.3"
+version: '3'
 
 services:
-  freepbx:  
-    image: tiredofit/freepbx:latest 
+
+  freepbx:
+    image: sangoma/freepbx:latest
     ports:
       - "80:80"
-      - "443:443"
+      - "443:443"  
       - "5060:5060"
+      - "5061:5061"
       - "10000-10200:10000-10200/udp"
-      
     volumes:
-      - ./data:/config
-      - /etc/localtime:/etc/localtime:ro
-
+      - /mnt/appdata/freepbx:/var/lib/asterisk
     environment:
-      - PUID=1000 
-      - PGID=1000
       - TZ=America/New_York
+    restart: always
 
-    restart: unless-stopped
-
-volumes:
-  data:
+  db: 
+    image: mariadb:latest
+    volumes:
+      - /mnt/appdata/freepbx/mysql:/var/lib/mysql
+    environment:  
+      - MYSQL_ROOT_PASSWORD=amp111
+      - MYSQL_DATABASE=asterisk
+      - MYSQL_USER=asterisk 
+      - MYSQL_PASSWORD=amp111
       
 x-casaos:
   architectures:
