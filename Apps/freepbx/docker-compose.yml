@@ -1,30 +1,38 @@
-version: '3'
+version: '2'
 
 services:
-
   freepbx:
-    image: sangoma/freepbx:latest
+    image: 'sipxcom/freepbx'
     ports:
-      - "80:80"
-      - "443:443"  
-      - "5060:5060"
-      - "5061:5061"
-      - "10000-10200:10000-10200/udp"
-    volumes:
-      - /mnt/appdata/freepbx:/var/lib/asterisk
+      - '5060:5060/udp'
+      - '5060:5060/tcp'
+      - '5160:5160/udp'
+      - '5160:5160/tcp'
+      - '18000-18100:18000-18100/udp'
     environment:
-      - TZ=America/New_York
+      - 'DB_HOST=db'
+      - 'DB_USER=freepbxuser'
+      - 'DB_PASS=password'
+      - 'ASTERISK_DB_PW=asterisk'
     restart: always
 
-  db: 
-    image: mariadb:latest
+  db:
+    image: 'mariadb'
+    environment:
+      - 'MYSQL_ROOT_PASSWORD=password'
+      - 'MYSQL_DATABASE=freepbx'
+      - 'MYSQL_USER=freepbxuser'
+      - 'MYSQL_PASSWORD=password'
+    restart: always
+
+  web:
+    image: 'php:apache'
     volumes:
-      - /mnt/appdata/freepbx/mysql:/var/lib/mysql
-    environment:  
-      - MYSQL_ROOT_PASSWORD=amp111
-      - MYSQL_DATABASE=asterisk
-      - MYSQL_USER=asterisk 
-      - MYSQL_PASSWORD=amp111
+      - '/var/www/html:/var/www/html'
+    restart: always
+    depends_on:
+      - db
+      - freepbx
       
 x-casaos:
   architectures:
