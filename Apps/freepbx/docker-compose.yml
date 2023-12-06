@@ -1,34 +1,26 @@
-version: "3.7"
+version: "3.3"
 
 services:
 
   freepbx:
     image: freepbx/freepbx:latest
     ports:
-      - "80:80"
-      - "443:443"
-      - "5060:5060"
-      - "5061:5061"  
-      - "10000-10200:10000-10200/udp"
+      - "8088:80"
+      - "4443:443" 
     environment:
-     - TZ="America/New_York"
-    volumes:
-      - /etc/localtime:/etc/localtime:ro  
-      - /path/on/host:/var/lib/asterisk
+      PUBLIC_IP: 192.168.1.10
+    volumes:  
+      - /docker/appdata/freepbx:/var/lib/asterisk
+    restart: unless-stopped
+  
+  db:  
+    image: freepbx/mariadb
     restart: always
-
-volumes:
-  freepbx_data:
-    driver: local
-    driver_opts:
-      type: 'none'
-      o: 'bind'
-      device: '/path/on/host'
-networks:
-  default:
-    external:
-      name: freepbx_network
-    
+    volumes:
+      - /docker/appdata2/freepbx:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=password123
+      
 x-casaos:
   architectures:
     - amd64
