@@ -13,7 +13,7 @@ services:
       MYSQL_PASSWORD: password
 
   freepbx:
-    image: freepbx/freepbx
+    image: freepbxcommunity/freepbx
     volumes:
       - freepbx_data:/var/lib/asterisk
     depends_on:
